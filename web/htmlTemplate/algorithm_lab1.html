@@ -1,0 +1,779 @@
+{{define "base"}}
+<!doctype html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <title>{{template "title" .}} -Algorithm Lab 1</title>
+  <link rel="stylesheet" href="/assets/css/main.css" />
+</head>
+
+<body>
+{{template "header" .}}
+
+{{template "nav" .}}
+
+{{template "antiBanner" .}}
+
+<main>
+
+
+  <div id="main" class="container">
+      <!-- Условия -->
+    <div class="8u 12u$(medium)">
+
+      <header>
+        <h2>Лабораторная работа 1</h2>
+        <p>№ = номер варианта * год рождения * день * месяц</p>
+      </header>
+      <p>Реализовать <a href="https://ru.wikipedia.org/wiki/Клеточный_автомат">двумерный клеточный автомат</a> с
+
+
+        <a href="https://ru.wikipedia.org/wiki/Окрестность_фон_Неймана">окрестностью фон Неймана</a>.
+
+
+        <span class="tooltip">Граничные условия выбрать самостоятельно.
+          <span class="tooltiptext">В клеточном автомате граничные условия определяют, как взаимодействуют клетки на границе автомата с его окружением. Граничные условия важны, поскольку они определяют поведение системы на границах и могут влиять на результаты моделирования.
+            <br>
+Существует несколько типов граничных условий в клеточных автоматах:
+<br>
+Замкнутые (периодические) граничные условия: Клетки на одной стороне автомата взаимодействуют с клетками на противоположной стороне. Таким образом, автомат формирует "циклическую" структуру без явной границы.
+<br>
+Открытые граничные условия: Клетки на границе автомата взаимодействуют только с клетками внутри автомата. На границе не предусмотрено взаимодействие с клетками за пределами автомата.
+<br>
+Зеркальные граничные условия: Клетки на границе автомата взаимодействуют с клетками внутри автомата, но при этом предполагается, что клетки за пределами автомата имеют зеркальное отражение клеток на границе.
+<br>
+Непроницаемые граничные условия: Клетки на границе автомата не взаимодействуют с клетками вне автомата, и их состояние остается неизменным на протяжении моделирования.
+<br>
+Выбор граничных условий зависит от конкретной задачи, которую нужно решить, и требований моделирования. Они могут оказывать влияние на распространение сигналов, распределение энергии или другие параметры, которые изменяются в клеточном автомате со временем.</span>
+        </span>
+        Ввод начальных условий осуществляется вручную или случайным образом. Пользователь определяет ширину поля.
+      В итоге необходимо проанализировать свой клеточный автомат в отчете (его поведение, паттерны, "сходимость" и т.д.).</p>
+    </div>
+
+      <!-- Поле ввода -->
+    <div class="9u$ 12u$(medium)">
+      <ul class="actions">
+        <li><input type="text" name="Rules" id="Rules" value="10100100010011110000" placeholder="Rules" /> </li>
+        <li><input type="text" name="Size" id="Size" value="400" placeholder="Size" /> </li>
+        <li><a id="RandomButton" class="button special">Random</a></li>
+          <li><button onclick="openPopup()" class="button ">Setting</button></li>
+      </ul>
+    </div>
+
+
+      <!-- окно с настройками -->
+      <script>
+          function openPopup() {
+              document.getElementById("popupOverlay").style.display = "flex";
+          }
+
+          function closePopup() {
+              document.getElementById("popupOverlay").style.display = "none";
+          }
+
+          function getInputValues() {
+              // получаем значения настроек из всплывающего окна
+              const StepSpeedValue = document.getElementById("Delay").value;
+              const countRulesValue = document.getElementById("countRules").value;
+              const FRFlag = document.getElementById("Fix-my-rules").checked;
+              const FSFlag = document.getElementById("Fix-my-size").checked;
+
+              console.log("Значение Delay:", StepSpeedValue);
+              console.log("Значение countRules:", countRulesValue);
+              console.log("Значение Fix-my-rules:", FRFlag);
+              console.log("Значение Fix-my-size:", FSFlag);
+
+              CountRules = countRulesValue
+              Delay = StepSpeedValue
+              FixRyRulesFlag = FRFlag
+              FixRySizeFlag = FSFlag
+              // Другие операции с полученными значениями
+
+            //обнуление текстовых полей
+              document.getElementById("story").value = ""
+              document.getElementById("cycleState").value= ""
+              document.getElementById("cycle2State").value= ""
+
+
+
+
+              closePopup();
+          }
+
+      </script>
+      <style>
+          .overlay {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background-color: rgba(0, 0, 0, 0.5);
+              display: flex;
+              justify-content: center;
+              align-items: center;
+          }
+
+          .popup {
+              background-color: white;
+              padding: 20px;
+              border-radius: 5px;
+          }
+      </style>
+
+      <div class="overlay" id="popupOverlay" style="display: none;">
+          <div class="popup">
+              Delay
+              <input type="number" id="Delay" value="0"  min ="0"  placeholder="Delay"><br><br>
+              Number of rules
+              <input type="number" id="countRules" value="5" min ="1" placeholder="Number of rules"><br><br>
+              Size For Analysis
+              <input type="number" id="SizeForAnalys" value="40" min ="0" step = "10" placeholder="Size For Analysis"><br><br>
+              num Iterations in analysis
+              <input type="number" id="numIterations" value="10" min ="0"  placeholder="numIterations"><br><br>
+
+              <div class="6u 12u$(small)">
+                  <input type="checkbox" id="Fix-my-rules" name="Fix-my-rules" checked>
+                  <label for="Fix-my-rules">Fix my rules</label>
+              </div>
+              <div class="6u 12u$(small)">
+                  <input type="checkbox" id="Fix-my-size" name="Fix-my-size" >
+                  <label for="Fix-my-size">Fix my size</label>
+              </div>
+              <button onclick="getInputValues()">To configure</button>
+
+
+
+          </div>
+
+      </div>
+
+
+      <!-- Поле с Клетками -->
+    <canvas id="canvas" width="400" height="400"  style="border:1px solid #000000;"></canvas>
+      <!-- Поле Старта -->
+    <ul class="actions">
+      <li><a  id="RunButton" class="button special">Run</a></li>
+      <li><a id="StepButton" class="button">Step</a></li>
+        <li><a id="Analysis"  onclick="Analys()" class="button alt">Analysis</a></li>
+    </ul>
+
+      <!-- Поле с графиком -->
+      <canvas id="myChart" width="400" height="400"></canvas>
+
+      <!-- Поле со стабильными состояниями -->
+      <br><label for="story">stable states found :</label>
+      <textarea id="story" name="story" rows="5" cols="33"></textarea>
+
+      <!-- Поле с циклическими состояниями -->
+      <br><label for="cycleState">cycle states found :</label>
+      <textarea id="cycleState" name="cycleState" rows="5" cols="33"></textarea>
+
+      <!-- Поле с циклическими состояниями 2 шага  -->
+      <br><label for="cycle2State">cycle states 2 found :</label>
+      <textarea id="cycle2State" name="cycle2State" rows="5" cols="33"></textarea>
+
+
+  </div>
+
+
+    <!-- инифиализация, задание переменных, функ отрисовки, обновления, подсчета-->
+    <!-- Обработчик  "Run" "Step", Функция RUN-->
+  <script>
+    // Получаем ссылки на элементы страницы
+
+    //количество правил
+    var CountRules = 5
+    //задержка
+    var Delay = 0
+    // фиксировать мой вариант
+    var FixRyRulesFlag = true
+    // фиксировать мой размер
+    var FixRySizeFlag= false
+
+    const myRules = "10100100010011110000"
+
+    const canvas = document.getElementById('canvas');
+    const runButton = document.getElementById('RunButton');
+    const stepButton = document.getElementById('StepButton');
+    var sizeInput = document.getElementById('Size');
+    var RulesInput = document.getElementById('Rules');
+    const ctx = canvas.getContext('2d');
+
+    var stabileState = []
+
+    var Rules = RulesInput.value.match(new RegExp(`.{1,4}`, 'g'));
+
+
+      // Задаем размер клеток
+    const cellSize = 10;
+
+    var numRows = sizeInput.value / cellSize;
+    var numCols = sizeInput.value / cellSize;
+    let grid = new Array(numRows);
+
+
+    function initCell (){
+      globalThis.numRows = sizeInput.value / cellSize;
+      globalThis.numCols = sizeInput.value / cellSize;
+
+      globalThis.Rules = [...new Set( RulesInput.value.match(new RegExp(`.{1,4}`, 'g')) )];
+
+      console.log(Rules)
+
+      // Создаем двумерный массив для хранения состояния клеток
+      globalThis.grid = new Array(numRows);
+      for (let i = 0; i < numRows; i++) {
+        grid[i] = new Array(numCols);
+        for (let j = 0; j < numCols; j++) {
+          // Задаем начальное состояние клеток (0 - мертвая, 1 - живая)
+          grid[i][j] = Math.floor(Math.random() * 2);
+        }
+      }
+    }
+
+    initCell()
+
+
+
+
+
+
+    // Функция для отрисовки клеточного автомата
+    function drawGrid() {
+      ctx.clearRect(0, 0, sizeInput.value , sizeInput.value );
+
+      for (let i = 0; i < numRows; i++) {
+        for (let j = 0; j < numCols; j++) {
+          const cell = grid[i][j];
+          ctx.beginPath();
+          ctx.rect(j * cellSize, i * cellSize, cellSize, cellSize);
+          ctx.fillStyle = cell ? '#294c4e' : '#FFFFFF';
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Функция для обновления состояния клеток на следующем шаге
+    function updateGrid() {
+
+        const newGrid = new Array(numRows);
+        //console.log("Rules ",Rules)
+      for (let i = 0; i < numRows; i++) {
+        newGrid[i] = new Array(numCols);
+        for (let j = 0; j < numCols; j++) {
+          const cell = grid[i][j];
+
+          const checkRulesFlag = checkRules(i, j);
+
+          if  (checkRulesFlag === true ) {
+              newGrid[i][j] = ( cell === 0 ? 1 : 0);
+          } else {
+              newGrid[i][j] = cell
+          }
+
+        }
+      }
+
+      grid = newGrid;
+    }
+
+    // Функция для подсчета количества живых соседей клетки
+    function checkRules(row, col) {
+        let arr = []; // Содержит результат обхода соседей клетки например 1010
+
+      for (let i = -1; i <= 1; i++) {
+        for (let j = -1; j <= 1; j++) {
+          if((i ===0 ^ j ===0 ) ){
+
+              /*
+          Функция countNeighbors(row, col) используется для подсчета количества живых соседей клетки в клеточном автомате. В случае, когда рассматриваемая клетка находится на границе массива, необходимо учесть периодические граничные условия, чтобы правильно подсчитать соседей.
+
+Когда мы находимся на границе массива, у нас может быть два возможных случая:
+
+Клетка находится на границе верхнего или левого края массива:
+
+Если текущая клетка находится на верхней границе, то соседней клеткой сверху будет клетка, находящаяся на нижней границе массива. То есть, мы делаем "оборот" и переходим на соответствующую клетку на противоположной границе массива.
+Если текущая клетка находится на левой границе, то соседняя клетка слева будет находиться на правой границе массива. Опять же, мы делаем "оборот" и переходим на соответствующую клетку на противоположной границе.
+Клетка находится на границе нижнего или правого края массива:
+
+Если текущая клетка находится на нижней границе, то соседней клеткой снизу будет клетка, находящаяся на верхней границе массива. Мы делаем "оборот" и переходим на соответствующую клетку на противоположной границе.
+Если текущая клетка находится на правой границе, то соседняя клетка справа будет находиться на левой границе массива. Опять же, мы делаем "оборот" и переходим на соответствующую клетку на противоположной границе.
+В коде функции countNeighbors(row, col), чтобы учесть периодические граничные условия, используются следующие выражения:
+
+javascript
+Copy code
+const neighborRow = (row + i + numRows) % numRows;
+const neighborCol = (col + j + numCols) % numCols;
+Где numRows - количество строк в массиве клеточного автомата, numCols - количество столбцов в массиве. Используя эти выражения, мы обеспечиваем периодическое "оборотное" перемещение, чтобы получить правильные индексы соседних клеток на противоположных границах массива.
+
+Таким образом, функция countNeighbors(row, col) правильно учитывает граничные условия и корректно подсчитывает количество живых соседей для клетки в клеточном автомате, даже если она находится на границе массива.*/
+
+              const neighborRow = (row + i + numRows) % numRows;
+              const neighborCol = (col + j + numCols) % numCols;
+
+
+
+              arr.push(grid[neighborRow][neighborCol])
+
+          }
+          continue;
+        }
+      }
+        //console.log("arr ", arr.join(''),Rules.includes(arr.join('')))
+        //console.log("Rules.includes(arr) ",Rules.includes(arr))
+      return Rules.includes(arr.join(''));
+    }
+
+    // Обработчик клика на кнопку "Run"
+    let runSimulation = false;
+    let animationId;
+
+    runButton.addEventListener('click', () => {
+      runSimulation = !runSimulation;
+
+      if (runSimulation) {
+        runButton.innerText = 'Stop';
+        stepButton.disabled = true;
+        run();
+      } else {
+        runButton.innerText = 'Run';
+        stepButton.disabled = false;
+        cancelAnimationFrame(animationId);
+      }
+    });
+
+    // Обработчик клика на кнопку "Step"
+    stepButton.addEventListener('click', () => {
+      updateGrid();
+      drawGrid();
+    });
+
+    // Функция для запуска автомата
+    function run() {
+        if (!runSimulation) {
+            return;
+        }
+
+        updateGrid();
+
+        drawGrid();
+
+        setTimeout(function() {
+            animationId = requestAnimationFrame(run);
+        }, Delay*100);
+    }
+
+
+
+    // Инициализация начального состояния автомата
+    drawGrid();
+  </script>
+    <!-- замена значений в матрице -->
+    <script>
+
+        // Обработчик события клика на canvas
+        canvas.addEventListener("click", function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            // Определяем индексы ячейки в матрице на основе координат клика
+            const cellX = Math.floor(x / cellSize);
+            const cellY = Math.floor(y / cellSize);
+
+            // Изменяем значение ячейки в матрице
+            grid[cellY][cellX] = grid[cellY][cellX] === 0 ? 1 : 0;
+
+            // Обновляем отображение матрицы
+            drawGrid();
+        });
+    </script>
+    <!-- Обработчик  "Analysis"-->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+
+        //обработка кнопочки Analysis
+        function Analys(){
+            const sizeInput = document.getElementById("Size");
+            sizeInput.value = document.getElementById('SizeForAnalys').value;
+            const numIterations = document.getElementById('numIterations').value;
+
+            changeCanvasSize();
+
+
+            var states = [];
+            for (let i = 0; i < numIterations; i++) {
+                updateGrid();
+                states.push(grid);
+                drawGrid();
+
+            }
+
+            drawGrid();
+            console.log("states", states)
+            countAndPlotCells(states)
+            FindPatternts(states)
+        }
+
+
+        // Функция для подсчета числа живых и мертвых клеток и построения графика
+        function countAndPlotCells(states) {
+            // Массивы для хранения числа живых и мертвых клеток в каждой итерации
+            var liveCells = [];
+            var deadCells = [];
+
+            // Очистка массивов перед расчетами
+            liveCells.length = 0;
+            deadCells.length = 0;
+
+            // Проверка наличия предыдущего графика и его уничтожение
+            var chartContainer = document.getElementById('myChart');
+            if (chartContainer) {
+                var oldChart = Chart.getChart(chartContainer);
+                if (oldChart) {
+                    oldChart.destroy();
+                }
+            }
+
+            // Проход по каждой итерации/состоянию клеточного автомата
+            for (var i = 0; i < states.length; i++) {
+                var state = states[i];
+                var liveCount = 0;
+                var deadCount = 0;
+
+                // Проход по каждой клетке в состоянии
+                for (var j = 0; j < state.length; j++) {
+                    for (var k = 0; k < state[j].length; k++) {
+                        if (state[j][k] === 1) {
+                            liveCount++;
+                        } else {
+                            deadCount++;
+                        }
+                    }
+                }
+
+                // Добавление числа живых и мертвых клеток в соответствующие массивы
+                liveCells.push(liveCount);
+                deadCells.push(deadCount);
+            }
+
+// записывает стабильные состояния
+            for (let i = 0; i < states.length-1; i++) {
+                let state1 = states[i];
+                let state2 = states[i+1];
+                //console.log("state1", flatten2DArray(state1))
+                //console.log("state2", flatten2DArray(state2))
+                if ( flatten2DArray(state1) ===  flatten2DArray(state2)) {
+                    stabileState.push(state1)
+                    //console.log("stabileState", state1)
+
+                    document.getElementById("story").value += flatten2DArray(state2) + "\n";
+
+                    break
+                }
+            }
+
+            // записывает циклические  состояния
+            for (let i = 0; i < states.length-2; i++) {
+                let state1 = states[i];
+                let state2 = states[i+1];
+                let state3 = states[i+2];
+                //console.log("state1", flatten2DArray(state1))
+                //console.log("state2", flatten2DArray(state2))
+                if ( (flatten2DArray(state1) === flatten2DArray(state3)) && ( flatten2DArray(state1) !==  flatten2DArray(state2)) ){
+                    stabileState.push(state1)
+                    //console.log("stabileState", state1)
+
+                    document.getElementById("cycleState").value += flatten2DArray(state1) + "\n";
+
+                    break
+                }
+            }
+
+            // записывает циклические состояния 2
+            for (let i = 0; i < states.length-3; i++) {
+                let state1 = states[i];
+                let state2 = states[i+1];
+                let state3 = states[i+2];
+                let state4 = states[i+3];
+
+                if ( (flatten2DArray(state1) === flatten2DArray(state4)) && ( flatten2DArray(state1) !==  flatten2DArray(state2))  && ( flatten2DArray(state3) !==  flatten2DArray(state4))){
+                    stabileState.push(state1)
+
+
+                    document.getElementById("cycle2State").value += flatten2DArray(state1) + "\n";
+
+                    break
+                }
+            }
+
+            // Построение графика
+            var ctx = chartContainer.getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({ length: states.length }, (_, i) => i + 1), // Метки для оси X (итерации)
+                    datasets: [
+                        {
+                            label: 'Живые клетки',
+                            data: liveCells,
+                            borderColor: 'green',
+                            backgroundColor: 'rgb(41, 76, 78, 0.2)',
+                        },
+                        {
+                            label: 'Мертвые клетки',
+                            data: deadCells,
+                            borderColor: 'red',
+                            backgroundColor: 'rgba(255, 0, 0, 0.2)',
+                        },
+                    ],
+                },
+                options: {
+                    //maintainAspectRatio: false, // Отключение поддержки соотношения сторон
+                    aspectRatio: states.length / 4, // Ширина зависит от количества состояний
+                },
+            });
+        }
+
+
+
+        function flatten2DArray(array) {
+            // Применяем метод flat() для "разворачивания" двумерного массива в одномерный массив
+            const flattenedArray = array.flat();
+
+            // Используем метод join() для объединения элементов массива в строку
+            const result = flattenedArray.join(' ');
+
+            return result;
+        }
+
+
+
+
+        function computeMatrix(matrix1, matrix2) {
+
+
+            // Создание новой матрицы
+            var result = [];
+
+            // Проход по элементам матриц и вычисление нового значения
+            for (var i = 0; i < matrix1.length; i++) {
+                var row = [];
+                for (var j = 0; j < matrix1[i].length; j++) {
+                    // Вычисление нового значения на основе соответствующих элементов входных матриц
+                    var newValue = Number(matrix1[i][j] == matrix2[i][j]);
+                    row.push(newValue);
+                }
+                result.push(row);
+            }
+
+            return result;
+        }
+
+        // Функция для подсчета числа живых и мертвых клеток и построения графика
+        function FindPatternts(states) {
+
+            let result = new Array(states.length);
+
+            for (var i = 0; i < states.length; i++) {
+                result[i] = new Array(states.length);
+            }
+
+
+
+            for (let i = 0; i < states.length; i++) {
+                for (let j = i; j < states.length; j++) {
+                    let state1 = states[i];
+                    let state2 = states[j];
+
+                    let res = computeMatrix(state1,state2)
+                    result[i][j] = res
+                }
+            }
+
+            //console.log(result)
+        }
+
+        function display4DMatrix(matrix) {
+            // Получаем количество измерений в каждой размерности
+            const dim1 = matrix.length;
+            const dim2 = matrix[0].length;
+            const dim3 = matrix[0][0].length;
+            const dim4 = matrix[0][0][0].length;
+
+            // Создаем пустой элемент <textarea> для вывода
+            const textarea = document.getElementById("story");
+            textarea.rows = dim1 * dim3; // Высота textarea будет зависеть от количества элементов в первой и третьей размерностях
+            textarea.cols = dim2 * dim4; // Ширина textarea будет зависеть от количества элементов во второй и четвертой размерностях
+
+            let output = '';
+
+            // Проходим по всем элементам и формируем текст вывода
+            for (let i = 0; i < dim1; i++) {
+                for (let j = 0; j < dim2; j++) {
+                    for (let k = 0; k < dim3; k++) {
+                        for (let l = 0; l < dim4; l++) {
+                            // Проверяем, что индексы находятся в допустимом диапазоне
+                            if (
+                                i < matrix.length &&
+                                j < matrix[i].length &&
+                                k < matrix[i][j].length &&
+                                l < matrix[i][j][k].length
+                            ) {
+                                const subMatrix = matrix[i][j][k][l];
+
+                                // Проверяем, является ли subMatrix массивом
+                                if (Array.isArray(subMatrix)) {
+                                    // Конвертируем подматрицу в строку
+                                    const subMatrixString = subMatrix.map(row => row.join(' ')).join('\n');
+
+                                    // Добавляем подматрицу к общему выводу с пробелами между матрицами
+                                    output += subMatrixString + ' ';
+                                } else {
+                                    // Если subMatrix не является массивом, выводим его как строку
+                                    output += subMatrix + ' ';
+                                }
+                            }
+                        }
+                        output += '\n'; // Переходим на новую строку после каждой третьей размерности
+                    }
+                    output += '\n'; // Переходим на новую строку после каждой второй размерности
+                }
+                output += '\n'; // Переходим на новую строку после каждой первой размерности
+            }
+
+            // Выводим текст в textarea
+            textarea.value = output;
+
+        }
+
+
+
+
+
+
+    </script>
+
+
+</main>
+
+{{template "footer" .}}
+
+</body>
+{{template "Scripts" .}}
+
+
+<style>
+  .tooltip {
+    position: relative;
+    display: inline-block;
+  }
+
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 800px;
+    background-color: #000;
+    color: #fff;
+    text-align: left;
+    font-size: 15px;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+  }
+</style>
+<script>
+
+  // Функция для изменения значения width canvas
+  function changeCanvasSize() {
+    const size = parseInt(sizeInput.value); // Получаем значение из input и преобразуем в число
+    canvas.width = size; // Устанавливаем новое значение width
+    canvas.height = size; // Устанавливаем новое значение height
+
+    initCell();
+
+    drawGrid();
+
+
+  }
+
+  // Вызываем функцию при изменении значения input
+  sizeInput.addEventListener("input", changeCanvasSize);
+
+
+  function generateRandomSequence(length) {
+    let sequence = "";
+    for (let i = 0; i < length; i++) {
+      sequence += Math.floor(Math.random() * 2); // Генерируем случайное число 0 или 1
+    }
+    return sequence;
+  }
+
+  function generateRandomSize(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min; // Генерируем случайное число в диапазоне от min до max
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const rulesInput = document.getElementById("Rules");
+    const sizeInput = document.getElementById("Size");
+    const randomButton = document.querySelector("#RandomButton");
+
+    randomButton.addEventListener("click", function(event) {
+      event.preventDefault();
+
+
+      let randomSequence;
+        if (FixRyRulesFlag === true ){
+            randomSequence = myRules
+        } else {
+            randomSequence = generateRandomSequence(4 * CountRules);
+        }
+
+
+        let randomSize;
+        if (FixRySizeFlag === true ){
+            randomSize =  document.getElementById("Size").value
+        } else {
+            randomSize = generateRandomSize(10, 40) * 10;
+        }
+
+
+
+        console.log("CountRules",CountRules)
+        console.log("Delay",Delay)
+        console.log("Fix my rules flag", FixRyRulesFlag)
+        console.log("Fix my size flag", FixRySizeFlag)
+
+      rulesInput.value = randomSequence;
+      sizeInput.value = randomSize;
+
+      const canvas = document.getElementById("canvas");
+      canvas.width = randomSize;
+      canvas.height = randomSize;
+      initCell();
+
+      drawGrid();
+    });
+  });
+</script>
+
+
+
+
+</html>
+{{end}}
+
+
+

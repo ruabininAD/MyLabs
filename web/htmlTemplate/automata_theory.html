@@ -1,0 +1,30 @@
+{{define "base"}}
+<!doctype html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <title>{{template "title" .}} - Automata theory</title>
+  <link rel="stylesheet" href="/assets/css/main.css" />
+</head>
+
+<body>
+{{template "header" .}}
+
+{{template "nav" .}}
+
+{{template "antiBanner" .}}
+
+<main>
+
+  {{template "Automata_theory" .}}
+
+</main>
+
+{{template "footer" .}}
+
+</body>
+{{template "Scripts" .}}
+
+
+</html>
+{{end}}

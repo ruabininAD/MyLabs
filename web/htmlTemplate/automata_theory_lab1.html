@@ -1,0 +1,310 @@
+{{define "base"}}
+<!doctype html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <title>{{template "title" .}} -Automata theory Lab 1</title>
+  <link rel="stylesheet" href="/assets/css/main.css" />
+</head>
+
+<body>
+{{template "header" .}}
+
+{{template "nav" .}}
+
+{{template "antiBanner" .}}
+
+<!-- Скрытие оригинального input[type="file"] -->
+<style>
+
+    #fileInput {
+        display: none;
+    }
+</style>
+
+<!-- init-->
+<script>
+    var MyText = "0"
+    var variant = "1"
+</script>
+
+<!-- readFile-->
+<script>
+
+    function readFile() {
+        var fileInput = document.getElementById('fileInput');
+        var file = fileInput.files[0];
+
+        var reader = new FileReader();
+        reader.onload = function(event) {
+            var contents = event.target.result;
+            MyText = processFileContents(contents);
+            console.log(MyText)
+        };
+
+        reader.readAsText(file);
+    }
+    function processFileContents(fileContents) {
+        // Разделяем содержимое файла на отдельные строки
+        const lines = fileContents.split("\n");
+
+        // Создаем новый массив для хранения обработанных строк
+        const processedLines = [];
+
+        // Перебираем каждую строку файла
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim(); // Удаляем начальные и конечные пробелы строки
+
+            // Проверяем, если строка пустая или начинается с "//"
+            if (line === "" || line.startsWith("//")) {
+                continue; // Пропускаем текущую итерацию цикла
+            }
+
+            // Удаляем продолжение строки после "//"
+            const commentIndex = line.indexOf("//");
+            if (commentIndex !== -1) {
+                line = line.substring(0, commentIndex).trim();
+            }
+
+            // Заменяем все кратные пробелы на один пробел
+            line = line.replace(/\s+/g, " ");
+
+            // Добавляем обработанную строку в массив
+            processedLines.push(line);
+        }
+
+        // Объединяем обработанные строки в одну строку с использованием символа новой строки
+        const processedContents = processedLines.join("\n");
+
+        // Возвращаем обработанное содержимое файла
+        return processedContents;
+    }
+
+    function AnalysisRun(){
+        MyText = document.getElementById("myText").value
+        console.log(MyText)
+    }
+
+
+</script>
+
+<!-- окно с настройками -->
+<script>
+    function openPopup() {
+        document.getElementById("popupOverlay").style.display = "flex";
+
+    }
+
+    function closePopup() {
+        document.getElementById("popupOverlay").style.display = "none";
+        console.log(variant)
+    }
+
+    function getInputValues() {
+        // получаем значения настроек из всплывающего окна
+        variant =  getSelectedPriority()
+
+
+
+
+
+        closePopup();
+
+    }
+
+    function getSelectedPriority() {
+        // Получаем все радиокнопки с именем "priority"
+        const radioButtons = document.getElementsByName("priority");
+
+        // Перебираем радиокнопки и проверяем, какая из них выбрана
+        for (let i = 0; i < radioButtons.length; i++) {
+            if (radioButtons[i].checked) {
+                // Возвращаем значение выбранной радиокнопки
+                return radioButtons[i].id;
+            }
+        }
+
+        // Если ни одна радиокнопка не выбрана, возвращаем null или другое значение по умолчанию
+        return null;
+    }
+
+</script>
+<style>
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+
+    .popup {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+    }
+</style>
+
+<main>
+
+  <div id="main" class="container">
+      <!-- Условия -->
+      <div class="8u 12u$(medium)">
+
+        <header>
+            <h2>Лабораторная работа 1</h2>
+        </header>
+        <p>
+            Написать программу, которая выполняет лексический анализ входного текста в
+            соответствии с заданием и порождает таблицу лексем с указанием их типов и значений.<br>
+            Текст на входном языке задается в виде символьного (текстового) файла.<br>
+            Программа должна выдавать сообщения о наличие во входном тексте ошибок, которые могут быть
+            обнаружены на этапе лексического анализа.<br>
+            Длина идентификатора и строковых констант ограничена 16 символами.<br>
+            Программа должна допускать наличие комментариев неограниченной длины во входном
+            файле.</p>
+
+    </div>
+
+      <!-- Поле ввода -->
+      <div class="9u$ 12u$(medium)">
+          <ul class="actions">
+              <li><input type="text" name="myText" id="myText" value="" placeholder="your text" /> </li>
+
+              <li><a onclick="AnalysisRun()"  class="button special">Analysis</a></li>
+              <li><button onclick="openPopup()" class="button ">Setting</button></li>
+          </ul>
+      </div>
+
+
+      <!-- Всплывающее окно выбора варианта -->
+      <div class="overlay" id="popupOverlay" style=" display: none;">
+          <div class="popup">
+              <div class="12u 12u$(small)">
+                  <input type="radio" id="radio_1" name="priority" checked>
+                  <label for="radio_1" > арифметические выражения, разделенные ;.
+                      Арифметические выражения состоят из идентификаторов, десятичных чисел с
+                      плавающей точкой (в обычной и логарифмической форме), знака присваивания  :=,
+                      знаков операций +, –, *, / и  ( ) </label>
+              </div>
+              <div class="12u 12u$(small)">
+                  <input type="radio" id="radio_2" name="priority">
+                  <label for="radio_2"> логические выражения, разделенные ;. Логические выражения состоят из идентификаторов, констант true и false, знака
+                      присваивания  :=, операций or, xor, and, not и  ( ) .
+                  </label>
+              </div>
+              <div class="12u 12u$(small)">
+                  <input type="radio" id="radio_3" name="priority" >
+                  <label for="radio_3"> операторы условия if ... then ... else и if ... then, разделенные
+                       ;. Cодержат идентиф,  <, >, =, десятичные числа с плавающей точкой (в обычной и логарифмической
+                      форме), знак присваивания  :=.
+                  </label>
+              </div>
+              <div class="12u 12u$(small)">
+                  <input type="radio" id="radio_4" name="priority">
+                  <label for="radio_4"> операторы цикла for (...;...;...) do, разделенные ;
+                      . Операторы цикла содержат идентификаторы, <, >, =,
+                      десятичные числа с плавающей точкой (в обычной и логарифмической форме), знак
+                      присваивания  :=.
+                  </label>
+              </div>
+              <div class="12u 12u$(small)">
+                  <input type="radio" id="radio_5" name="priority">
+                  <label for="radio_5">
+                       арифметические выражения, разделенные ;. Арифметические выражения состоят из идентификаторов, римских чисел, знака
+                      присваивания  :=, знаков операций +, –, *, / и  ( ) . Римскими считать числа,
+                      записанные большими буквами X, V и I.
+                  </label>
+              </div>
+              <div class="12u 12u$(small)">
+                  <input type="radio" id="radio_6" name="priority">
+                  <label for="radio_6">
+                      арифметические выражения, разделенные ; из идентиф, шестнадцатеричных
+                      чисел,  присваивания  :=,  операций +, –, *, / и ( ).
+                      Шестнадцатеричными числами считать последовательность цифр и символов a, b, c, d, e, f, начинающуюся с цифры (например, 89, 45ac, 0abc).
+                  </label>
+              </div>
+              <div class="12u 12u$(small)">
+                  <input type="radio" id="radio_7" name="priority">
+                  <label for="radio_7">
+                       арифметические выражения, разделенные ;. Арифметические выражения состоят из идентиф, char , :=,  +, –, *, / и ( ).
+                  </label>
+              </div>
+              <div class="12u 12u$(small)">
+                  <input type="radio" id="radio_8" name="priority">
+                  <label for="radio_8">
+                       логические выражения, разделенные ;. Логические выражения состоят из идентификаторов, символьных констант 'T' и
+                      'F',   :=,  or, xor, and, not и ( ).
+                  </label>
+              </div>
+              <div class="12u 12u$(small)">
+                  <input type="radio" id="radio_9" name="priority">
+                  <label for="radio_9">
+                      логические выражения, разделенные  ;. Логические выражения состоят из идентификаторов, констант 0 и 1, знака
+                      присваивания  :=, операций or, xor, and, not и  ( ) .
+                  </label>
+              </div>
+              <div class="12u 12u$(small)">
+                  <input type="radio" id="radio_10" name="priority">
+                  <label for="radio_10">
+                      if ... then ... else и if ... then, разделенные ;. содержат идентиф, <, >, =, римские числа,:=. римские-  X, V и I.
+                  </label>
+              </div>
+              <div class="12u 12u$(small)">
+                  <input type="radio" id="radio_11" name="priority">
+                  <label for="radio_11">
+                       for (...;...;...) do, разделенные ;. Цикл содержат идентиф, <, >, =, строковые константы "блабла",:=.
+                  </label>
+              </div>
+              <div class="12u 12u$(small)">
+                  <input type="radio" id="radio_12" name="priority">
+                  <label for="radio_12">
+                      Логические выражения, разделенные ;. Выражения состоят из идентификаторов, констант 'T' и
+                      'F', :=, операций or, xor, and, not и ( ).
+                  </label>
+              </div>
+              <button onclick="getInputValues()">To configure</button>
+
+
+
+          </div>
+
+      </div>
+
+      <!-- Поле ввода -->
+      <div class="9u$ 12u$(medium)">
+          <label for="fileInput" class="button ">Choice file </label>
+          <input type="file" id="fileInput" accept=".txt">
+          <button onclick="readFile()" class="button special "> file analysis</button>
+      </div>
+
+
+
+
+
+
+
+  </div>
+
+</main>
+
+{{template "footer" .}}
+
+</body>
+{{template "Scripts" .}}
+
+
+
+
+
+
+</html>
+{{end}}
+
+
+

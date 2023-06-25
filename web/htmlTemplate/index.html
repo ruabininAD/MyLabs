@@ -1,0 +1,42 @@
+{{define "base"}}
+  <!doctype html>
+  <html lang='en'>
+    <head>
+      <meta charset='utf-8'>
+      <title>{{template "title" .}} </title>
+      <link rel="stylesheet" href="/assets/css/main.css" />
+    </head>
+
+
+    <body>
+    {{template "header" .}}
+
+    {{template "nav" .}}
+
+    {{template "banner" .}}
+
+
+      <main>
+        <!--{{template "main" .}}-->
+
+        {{template "algorithms" .}}
+
+        {{template "Two" .}}
+
+        <!--{{template "Three" .}}-->
+
+
+      </main>
+
+
+      {{template "footer" .}}
+
+    </body>
+    <!-- Scripts -->
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/jquery.scrollex.min.js"></script>
+    <script src="assets/js/skel.min.js"></script>
+    <script src="assets/js/util.js"></script>
+    <script src="assets/js/main.js"></script>
+  </html>
+{{end}}
